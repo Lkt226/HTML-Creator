@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Creator</title>
+
+    <script src="./script.js" defer></script>
+
+    <style>
+        *{
+            margin: 0px;
+            padding: 0px;
+            width: auto;
+            height: auto;
+            vertical-align: top;
+        }
+        body{
+            background: #f2f2f2;
+        }
+        #_body{
+            background: #ffffff;
+        }
+        #_toolBox{
+            position: fixed;
+            padding: 2%;
+            border-style: solid;
+            border-width: 1px;
+        }
+        #_toolInputs input{
+            position: inherit;
+            border-style: solid;
+            border-width: 0.5px;
+            width: 100%;
+            height: 20px;
+        }
+        span{
+            display: inline-block;
+        }
+        button{
+            width: 24%;
+        }
+
+    </style>
+</head>
+
+
+<!-- Essa toolBox é temporaria, ela vai ser dinamica, mudando entre criar e editar
+As toolInputs vão ser criadas pelo JS dependendo do que estou fazendo-->
+<body style="margin: 0%;">
+    <div id="_editor" style="margin: 1%;">
+        <div style="width: 49%; height: 100%;  display: inline-block;"> 
+            <h1>HTML Creator</h1>
+        </div>
+        <div style="width: 49%; height: 100%;  display: inline-block;" > 
+            <h2>Ferramentas</h2>
+            <button id="_btnDiv">Bloco</button>  
+            <button id="_btnText">Texto</button>  
+            <button id="_btnImage">Imagem</button>
+            <button id="_btnButton">Botão</button>  
+        </div>
+    </div>
+    <div id="_toolBox" style="background: yellow; width: 180px; height: 200px; right: 5%;">
+        <div id="_toolInputs">
+            <input id="_popType" type="text" placeholder="Type">
+            <input id="_popID" type="text" placeholder="ID">
+            <input id="_popValue" type="text" placeholder="Value">
+            <input id="_popSRC" type="text" placeholder="SRC">
+        </div>
+         <button id="_btnRemover" style="width: 100%; position: relative;">Remover</button> 
+    </div>
+
+    <header id="_header">
+       
+    </header>
+    <div id="_body">
+        
+    </div>
+    <div id="_footer">
+
+    </div>
+</body>
+</html>
