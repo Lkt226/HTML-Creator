@@ -61,10 +61,6 @@ function findInList(_item, _list){
     }else{return ""}
 }
 
-function addVariable(_name, _value) {
-    window[_name] = _value
-}
-
 function inElement(_id){
     _id = padronizer(_id, "_body");
     return document.getElementById(_id)
@@ -78,7 +74,7 @@ function addText(_value){
 }
 
 
-function addGroup(_type, _id, _width, _height, _aling, _padding ,_inTag) {
+function addGroup(_type, _id, _width, _height, _aling, _padding ,_inTag, _selectable) {
     const momTag = inElement(padronizer(_inTag, "_body"))
     _type = padronizer (_type, "div")
     this.element = momTag.appendChild(document.createElement(padronizer(_type, "div")));
@@ -91,7 +87,8 @@ function addGroup(_type, _id, _width, _height, _aling, _padding ,_inTag) {
         this.element.id = padronizer(_id, _type)+findInList(_type,allIDs)
         allIDs.push(this.element.id);
     }
-    this.element.onclick = toolBox
+    _selectable = padronizer(_selectable, true)
+    if (_selectable === true){this.element.onclick = toolBox}
     return this.element
 }
 
@@ -103,7 +100,7 @@ function addElement(_type, _id, _value, _inTag, _selectable) {
         this.element.id = padronizer(_id, _type)+findInList(_type,allIDs)
         allIDs.push(this.element.id);
     }
-    if (_selectable == true){this.element.onclick = toolBox}
+    if (_selectable === true){this.element.onclick = toolBox}
     switch (_type) {
         case "text": case "p":
             this.element.innerHTML = padronizer(_value, "");
@@ -113,6 +110,9 @@ function addElement(_type, _id, _value, _inTag, _selectable) {
             this.element.src = padronizer(_value, "");
             break;
     
+        case "input":
+            this.element.placeholder = padronizer(_value, this.element.id)
+            break
         default:
             this.element.innerHTML = padronizer(_value, "");
             break;
@@ -122,36 +122,61 @@ function addElement(_type, _id, _value, _inTag, _selectable) {
 
 
 function toolBox(_selected) {
-    if (padronizer(_selected, null) != null){
+    _toolGroup = inElement("_toolGroup")
+    if (_toolGroup == null){
+        _toolGroup = addGroup("div", "_toolGroup","100%","100%","","","_toolBox",false)
+    }
+        if (padronizer(_selected, null) != null){
         element = _selected.target
-        switch (element.tagName.toLowerCase()) {
+
+        function _toolTexts(_textInputs, _buttonInput){
+            if (_toolGroup.childElementCount == 0){
+            let _return = []
+                if (padronizer(_textInputs, true)){
+                    this._labelType = new addElement("label", "_toolType", "Tag", "_toolGroup",false); this._labelType.style.fontSize = "0px";
+                    this._type = new addElement("input", "_type", padronizer(element.localName, "Tag"), "_toolGroup",false);this._type.style.width = "97.5%";
+        
+                    this._labelID = new addElement("label", "_labelID", "Id", "_toolGroup",false); this._labelID.style.fontSize = "0px";
+                    this._id = new addElement("input", "_id", padronizer(element.id, "Tag"), "_toolGroup",false);this._id.style.width = "97.5%";
+                    
+                    this._labelText = new addElement("label", "_labelText", "Texto", "_toolGroup",false); this._labelText.style.fontSize = "0px";
+                    this._text = new addElement("input", "_text", padronizer(element.innerText, "Tag"), "_toolGroup",false);this._text.style.width = "97.5%";
+                    
+                    _return.push(this._type); _return.push(this._id); _return.push(this._text);
+                }
+                if (padronizer(_buttonInput, true)){
+                    this._labelRemove = new addElement("label", "_labelRemove", "Remover", "_toolGroup",false); this._labelRemove.style.fontSize = "0px";
+                    this._btnRemove = new addElement("button", "_btnRemove", "Remover", "_toolGroup",false); this._btnRemove.style.width = "100%";        
+                    _return.push(this._btnRemove)
+                }            
+                        
+            cL(_return)
+            return _return; 
+            }
+        }
+
+        switch (element.localName) {
             case 'div': case "span": case "container": case "header":
                 selected = element.id
                 break;
 
+            case "h1": case "p": case "h2": case "h3":
+                let toolText = new _toolTexts();
+                _type.onchange = function(){
+                let _old = element
+                let _new = addElement(_type.value, element.id, element.innerText, element.parentNode.id)
+                element.parentNode.replaceChild(_new, _old);}
+                _id.onchange = function(){element.id = _id.value}
+                _text.onchange = function(){element.innerHTML = _text.value}
+                _btnRemove.onclick = function(){element.remove()}
+                break
+
             default:
                 break;
         }
-        inElement("_popType").value = element.localName
-        inElement("_popID").value = element.id
-        inElement("_popValue").value = element.value
-        inElement("_popSRC").value = element.src
         cL(_selected)
-        inElement("_popType").onchange = function() {
-            let antigo = element
-            addElement(inElement("_popType").value, element.id, element.innerText, element.parentNode.id)
-            antigo.remove(); 
-            cL(selected)
-        }
-        inElement("_popID").onchange = function() {element.id = inElement("_popID").value}
-        inElement("_popValue").onchange = function() {element.value = inElement("_popValue").value}
-        inElement("_popSRC").onchange = function() {element.src = inElement("_popSRC").value}
-        inElement("_btnRemover").onclick = function () {element.remove()}
     }else{
-        inElement("_popType").value = ""
-        inElement("_popID").value = ""
-        inElement("_popValue").value = ""
-        inElement("_popSRC").value = ""
+        _toolGroup.remove()
     }
 }
 //Botões
@@ -180,8 +205,6 @@ function btnDiv(_col) {
     }
 }
 
-//tempElement = new addElement("img","",RandomImg(1400, 500), "",selected)
-//document.oncl = function(){selected = ""; cL("MissClick")}
 draggableElement("_toolBox")
 
 document.onclick = function(){
