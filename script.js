@@ -74,20 +74,25 @@ function addText(_value){
 }
 
 
-function addGroup(_type, _id, _width, _height, _aling, _padding ,_inTag, _selectable) {
+function addGroup(_type, _id, _col, _height, _aling, _padding ,_inTag, _selectable) {
+    _col = Number(padronizer(_col, 1))
+    col = `${100/_col}%`
+    if (_col > 1){_type = "span"} else {_type = "div"}
     const momTag = inElement(padronizer(_inTag, "_body"))
-    _type = padronizer (_type, "div")
-    this.element = momTag.appendChild(document.createElement(padronizer(_type, "div")));
-    this.element.id = padronizer (_id, "div")
-    this.element.style.width = padronizer(_width, "100%")
+    //_type = padronizer (_type, "div")
+    this.element = momTag.appendChild(document.createElement(_type));
+    this.element.style.width = col
     this.element.style.height = padronizer(_height, "100%")
     this.element.style.verticalAlign = padronizer(_aling, "top")
     this.element.style.padding = padronizer(_padding, "0px");
-    if (this.element.id != ""){
-        this.element.id = padronizer(_id, _type)+findInList(_type,allIDs)
-        allIDs.push(this.element.id);
-    }
     _selectable = padronizer(_selectable, true)
+    if (padronizer(_id, _type) != ""){
+        let preID = padronizer(_id, _type)
+        this.element.id = padronizer(_id, _type)+findInList(preID,allIDs)
+        if(_selectable === true){
+            allIDs.push(this.element.id);
+        }
+    }
     if (_selectable === true){this.element.onclick = toolBox}
     return this.element
 }
@@ -98,7 +103,9 @@ function addElement(_type, _id, _value, _inTag, _selectable) {
     _selectable = padronizer(_selectable, true)
     if (padronizer(_id, _type) != ""){
         this.element.id = padronizer(_id, _type)+findInList(_type,allIDs)
-        allIDs.push(this.element.id);
+        if(_selectable === true){
+                allIDs.push(this.element.id);
+        }
     }
     if (_selectable === true){this.element.onclick = toolBox}
     switch (_type) {
@@ -124,57 +131,99 @@ function addElement(_type, _id, _value, _inTag, _selectable) {
 function toolBox(_selected) {
     _toolGroup = inElement("_toolGroup")
     if (_toolGroup == null){
-        _toolGroup = addGroup("div", "_toolGroup","100%","100%","","","_toolBox",false)
-    }
+        _toolGroup = addGroup("div", "_toolGroup", 1,"100%","","","_toolBox",false)
+    }else{_toolGroup.remove(); _toolGroup = addGroup("div", "_toolGroup", 1,"100%","","","_toolBox",false)}
         if (padronizer(_selected, null) != null){
         element = _selected.target
 
-        function _toolTexts(_textInputs, _buttonInput){
+        function _tools(_globalInputs, _textInputs, _srcInputs, _buttonInput, _sizeInputs){
             if (_toolGroup.childElementCount == 0){
             let _return = []
-                if (padronizer(_textInputs, true)){
+                if (padronizer(_globalInputs, true)){
                     this._labelType = new addElement("label", "_toolType", "Tag", "_toolGroup",false); this._labelType.style.fontSize = "0px";
-                    this._type = new addElement("input", "_type", padronizer(element.localName, "Tag"), "_toolGroup",false);this._type.style.width = "97.5%";
-        
+                    this._type = new addElement("input", "_type", "Tag: "+padronizer(element.localName, "Tag"), "_toolGroup",false);this._type.style.width = "45.5%";this._type.style.padding = "2px";
+                    _type.onchange = function(){
+                        let _old = element
+                        let _new = addElement(_type.value, element.id, element.innerText, element.parentNode.id)
+                        element.parentNode.replaceChild(_new, _old);}
+
                     this._labelID = new addElement("label", "_labelID", "Id", "_toolGroup",false); this._labelID.style.fontSize = "0px";
-                    this._id = new addElement("input", "_id", padronizer(element.id, "Tag"), "_toolGroup",false);this._id.style.width = "97.5%";
+                    this._id = new addElement("input", "_id", "ID: "+padronizer(element.id, "Tag"), "_toolGroup",false);this._id.style.width = "45.5%";this._id.style.padding = "2px";
+                    _id.onchange = function(){element.id = _id.value} 
                     
-                    this._labelText = new addElement("label", "_labelText", "Texto", "_toolGroup",false); this._labelText.style.fontSize = "0px";
-                    this._text = new addElement("input", "_text", padronizer(element.innerText, "Tag"), "_toolGroup",false);this._text.style.width = "97.5%";
-                    
-                    _return.push(this._type); _return.push(this._id); _return.push(this._text);
+                    _return.push(this._type); _return.push(this._id);
                 }
+
+                if (padronizer(_textInputs, true)){
+                    this._labelText = new addElement("label", "_labelText", "Texto", "_toolGroup",false); this._labelText.style.fontSize = "0px";
+                    this._text = new addElement("textarea", "_text", ""+padronizer(element.innerText, "Tag"), "_toolGroup",false);this._text.style.width = "97%";this._text.style.padding = "2px";this._text.style.height = "60px";
+                    _text.onchange = function(){element.innerHTML = _text.value}
+
+                    _return.push(this._text)
+                }
+
+                if (padronizer(_srcInputs, true)){
+                    this._labelUrl = new addElement("label", "_labelUrl", "Url", "_toolGroup",false); this._labelUrl.style.fontSize = "0px";
+                    this._url = new addElement("input", "_url", "", "_toolGroup",false);this._url.style.width = "95.5%";
+                    this._url.style.padding = "2px"; this._url.type = "url"; this._url.value = padronizer(element.src, "")
+                    _url.onchange = function(){element.src = _url.value}
+
+                    _return.push(this._url)
+                }
+
+                if (padronizer(_sizeInputs, true)){
+                    this._labelWidth = new addElement("label", "_labelWidth", "Tag", "_toolGroup",false); this._labelWidth.style.fontSize = "0px";
+                    this._width = new addElement("input", "_width", "Width: "+padronizer(element.style.width, "100%"), "_toolGroup",false);this._width.style.width = "45.5%";this._width.style.padding = "2px";
+                    _width.onchange = function(){element.style.width = _width.value}
+
+                    this._labelHeight = new addElement("label", "_labelHeight", "Id", "_toolGroup",false); this._labelHeight.style.fontSize = "0px";
+                    this._height = new addElement("input", "_height", "Height: "+padronizer(element.style.height, "100%"), "_toolGroup",false);this._height.style.width = "45.5%";this._height.style.padding = "2px";
+                    _height.onchange = function(){element.style.height = _height.value} 
+                    
+                    this._labelCol = new addElement("label", "_labelCol", "Tag", "_toolGroup",false); this._labelCol.style.fontSize = "0px";
+                    this._col = new addElement("input", "_col", "Colunas: "+1, "_toolGroup",false);this._col.style.width = "95.5%";this._col.style.padding = "2px";
+                    _col.onchange = function(){
+                        let _old = element
+                        let _new = new addGroup(element.localName, "", 1,"",element.style.verticalAlign, element.style.padding)
+                        element.parentNode.replaceChild(_new, _old);
+                        for(let i = 0; i < _col.value; i++){
+                            let tempElement = new addGroup("","",_col.value,"100px","middle","0px",_new.id)
+                            allElements.push(tempElement)
+                        }
+                        //Resolução temporaria, para um bug
+                        toolBox(undefined)
+                    }
+
+                    _return.push(this._width); _return.push(this._height); _return.push(this._col);
+                }
+
                 if (padronizer(_buttonInput, true)){
                     this._labelRemove = new addElement("label", "_labelRemove", "Remover", "_toolGroup",false); this._labelRemove.style.fontSize = "0px";
-                    this._btnRemove = new addElement("button", "_btnRemove", "Remover", "_toolGroup",false); this._btnRemove.style.width = "100%";        
+                    this._btnRemove = new addElement("button", "_btnRemove", "Remover", "_toolGroup",false); this._btnRemove.style.width = "100%";this._btnRemove.style.padding = "2px";        
+                    _btnRemove.onclick = function(){element.remove()}
+
                     _return.push(this._btnRemove)
                 }            
-                        
-            cL(_return)
             return _return; 
             }
         }
 
         switch (element.localName) {
             case 'div': case "span": case "container": case "header":
-                selected = element.id
+                new _tools("",false,false,"","");
                 break;
 
             case "h1": case "p": case "h2": case "h3":
-                let toolText = new _toolTexts();
-                _type.onchange = function(){
-                let _old = element
-                let _new = addElement(_type.value, element.id, element.innerText, element.parentNode.id)
-                element.parentNode.replaceChild(_new, _old);}
-                _id.onchange = function(){element.id = _id.value}
-                _text.onchange = function(){element.innerHTML = _text.value}
-                _btnRemove.onclick = function(){element.remove()}
+                new _tools("","",false,"",false);
+                break
+
+            case "img": case "image":
+                new _tools("",false,"","",false);
                 break
 
             default:
                 break;
         }
-        cL(_selected)
     }else{
         _toolGroup.remove()
     }
@@ -197,10 +246,8 @@ function btnButton() {
 
 function btnDiv(_col) {
     _col = Number(padronizer(_col, 1))
-    col = `${100/_col}%`
-    if (_col > 1){type = "span"} else {type = "div"}
     for(let i = 0; i < _col; i++){
-        let tempElement = new addGroup(type,"",col,"100px","middle","0px","")
+        let tempElement = new addGroup("","",_col,"100px","middle","0px","")
         allElements.push(tempElement)
     }
 }
